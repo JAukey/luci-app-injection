@@ -1,0 +1,175 @@
+<fieldset class="cbi-section" id="cbi-<%=self.config%>-<%=self.sectiontype%>">
+	<%                                                                                                                                                                   
+   	    local uci  = require "luci.model.uci".cursor()                                                                                                               
+   	    local http_enabled = uci:get("injection","base","http_enabled")
+   	    local https_enabled = uci:get("injection","base","https_enabled")
+   	    local http_global = uci:get("injection","base","http_global")
+   	    local https_global = uci:get("injection","base","https_global")
+	%> 
+	<style>
+	    <% if self.sectiontype == "base" then -%>
+	    <% if not http_enabled then -%>                                  
+            #cbi-<%=self.config%>-http_domain                                
+            {                                                                                                             
+                display:none;                                                                                             
+            }                                                                                                             
+            <%- end %>                                                                                                        
+                                                                                                                          
+            <% if not https_enabled then -%>                                                                                  
+            #cbi-<%=self.config%>-https_domain                                                                                
+            {                                                                                                              
+                display:none;                                                                                              
+            }                                                                                                              
+            <%- end %>                                                                                                         
+                                                                                                                           
+            <% if not http_global then -%>                                                                                     
+            #cbi-<%=self.config%>-http_domain_bypass                                                                           
+            {                                                                                                              
+                display:none;                                                                                              
+            }                                                                                                              
+            <%- end %>                                                                                                          
+                                                                                                                            
+            <% if not https_global then -%>                                                                                       
+            #cbi-<%=self.config%>-https_domain_bypass                                                                             
+            {                                                                                                                 
+                display:none;                                                                                                 
+            }                                                                                                                 
+            <%- end %>                             
+	    #cbi-<%=self.config%>-<%=self.sectiontype%>-local_http_port,
+	    #cbi-<%=self.config%>-<%=self.sectiontype%>-local_https_port,
+	    #cbi-<%=self.config%>-<%=self.sectiontype%>-interfaces
+	    {
+		display:none;
+	    }
+	    .show {
+		display:block !important;
+	    }
+	    .hidden {
+		display:none;
+	    }
+	<%- else if self.sectiontype == "cache" then%>
+	    #cbi-<%=self.config%>-<%=self.sectiontype%>-cache_local_port,            
+            #cbi-<%=self.config%>-<%=self.sectiontype%>-cache_local_path,        
+            #cbi-<%=self.config%>-<%=self.sectiontype%>-ngxconf        
+            {                        
+                display:none;        
+            }          
+            .show {                              
+                display:block !important;        
+            } 
+	<%- end %>
+	<%- end %>
+	</style>
+	<script type="text/javascript">
+		window.onload=function(){
+			document.getElementById("cbid.injection.base.http_enabled").addEventListener("click",function () {
+				<% if not http_enabled then -%>                                    
+				document.getElementById("cbi-<%=self.config%>-http_domain").classList.toggle('show');
+				<%- else%>
+				document.getElementById("cbi-<%=self.config%>-http_domain").classList.toggle('hidden');
+				<%- end %>                                                       
+			 });
+			document.getElementById("cbid.injection.base.https_enabled").addEventListener("click",function () {
+				<% if not https_enabled then -%>                                                                        
+                                document.getElementById("cbi-<%=self.config%>-https_domain").classList.toggle('show');                  
+                                <%- else%>                                                                                              
+                                document.getElementById("cbi-<%=self.config%>-https_domain").classList.toggle('hidden');                
+                                <%- end %>  			
+			});
+			document.getElementById("cbid.injection.base.http_global").addEventListener("click",function () {
+                                <% if not http_global then -%>                                                           
+                                document.getElementById("cbi-<%=self.config%>-http_domain_bypass").classList.toggle('show');     
+                                <%- else%>                                                                                 
+                                document.getElementById("cbi-<%=self.config%>-http_domain_bypass").classList.toggle('hidden');   
+                                <%- end %>                                                                                 
+                        }); 
+			document.getElementById("cbid.injection.base.https_global").addEventListener("click",function () {
+                                <% if not https_global then -%>                                                           
+                                document.getElementById("cbi-<%=self.config%>-https_domain_bypass").classList.toggle('show');     
+                                <%- else%>                                                                                 
+                                document.getElementById("cbi-<%=self.config%>-https_domain_bypass").classList.toggle('hidden');   
+                                <%- end %>                                                                                 
+                        });  
+		}
+		var <%=self.sectiontype%>btnflag=0;
+		function <%=self.sectiontype%>display(obj){
+			<% if self.sectiontype == "base" then -%>
+			document.getElementById("cbi-<%=self.config%>-<%=self.sectiontype%>-local_http_port").classList.toggle('show');
+			document.getElementById("cbi-<%=self.config%>-<%=self.sectiontype%>-local_https_port").classList.toggle('show');
+			document.getElementById("cbi-<%=self.config%>-<%=self.sectiontype%>-interfaces").classList.toggle('show');
+		        obj.value=(<%=self.sectiontype%>btnflag)?"Display All Configs":"Hide Unnecessary Configs";
+			<%=self.sectiontype%>btnflag=~<%=self.sectiontype%>btnflag;
+		<%- else if self.sectiontype == "cache" then%>
+			document.getElementById("cbi-<%=self.config%>-<%=self.sectiontype%>-cache_local_port").classList.toggle('show');
+			document.getElementById("cbi-<%=self.config%>-<%=self.sectiontype%>-cache_local_path").classList.toggle('show');
+			document.getElementById("cbi-<%=self.config%>-<%=self.sectiontype%>-ngxconf").classList.toggle('show');
+		        obj.value=(<%=self.sectiontype%>btnflag)?"Display All Configs":"Hide Unnecessary Configs";
+			<%=self.sectiontype%>btnflag=~<%=self.sectiontype%>btnflag;
+		<%- end %>
+		<%- end %>
+		}
+		function clearCache(obj){
+		    var p = document.getElementById('cbid.injection.cache.cache_local_path');
+		    XHR.get('/cgi-bin/clearcache',p.value,function(req){alert("Cleared")});	
+		}			
+	</script>	
+	<% if self.title and #self.title > 0 then -%>
+		<legend><%=self.title%>	
+		<span class="cbi-value-helpicon">&nbsp;&nbsp;&nbsp;&nbsp;
+		<input class="cbi-button cbi-button-apply" type="button" value="Display All Configs"  onclick="<%=self.sectiontype%>display(this)" title="Display All Configs"/>
+		&nbsp;&nbsp;&nbsp;&nbsp;
+		<%-if self.sectiontype == "cache" then%>
+		<input class="cbi-button cbi-button-apply" type="button" value="Clear Cache"  onclick="clearCache(this)" title="Clear Cache"/>
+		<%- end %> 
+		</span>
+		</legend>
+	<%- end %>
+	<div class="cbi-section-descr"><%=self.description%></div>
+	<% local isempty = true for i, k in ipairs(self:cfgsections()) do -%>
+		<% if self.addremove then -%>
+			<div class="cbi-section-remove right">
+				<input type="submit" name="cbi.rts.<%=self.config%>.<%=k%>" onclick="this.form.cbi_state='del-section'; return true" value="<%:Delete%>" class="cbi-button" />
+			</div>
+		<%- end %>
+		<%- section = k; isempty = false -%>
+
+		<% if not self.anonymous then -%>
+			<h3><%=section:upper()%></h3>
+		<%- end %>
+
+		<%+cbi/tabmenu%>
+		<fieldset class="cbi-section-node<% if self.tabs then %> cbi-section-node-tabbed<% end %>" id="cbi-<%=self.config%>-<%=section%>">
+			<%
+				local uci  = require "luci.model.uci".cursor()
+				local aa = uci:get("injection","base","http_global")
+			%>
+			<%=aa%>
+			<%+cbi/ucisection%>
+
+		</fieldset>
+		<br />
+	<%- end %>
+
+	<% if isempty then -%>
+		<em><%:This section contains no values yet%><br /><br /></em>
+	<%- end %>
+
+	<% if self.addremove then -%>
+		<% if self.template_addremove then include(self.template_addremove) else -%>
+		<div class="cbi-section-create">
+			<% if self.anonymous then -%>
+				<input type="submit" class="cbi-button cbi-button-add" name="cbi.cts.<%=self.config%>.<%=self.sectiontype%>.<%=section%>" value="<%:Add%>" />
+			<%- else -%>
+				<% if self.invalid_cts then -%><div class="cbi-section-error"><% end %>
+				<input type="text" class="cbi-section-create-name" id="cbi.cts.<%=self.config%>.<%=self.sectiontype%>.<%=section%>" name="cbi.cts.<%=self.config%>.<%=self.sectiontype%>.<%=section%>" />
+				<script type="text/javascript">cbi_validate_field('cbi.cts.<%=self.config%>.<%=self.sectiontype%>.<%=section%>', true, 'uciname');</script>
+				<input type="submit" class="cbi-button cbi-button-add" onclick="this.form.cbi_state='add-section'; return true" value="<%:Add%>" />
+				<% if self.invalid_cts then -%>
+					<br /><%:Invalid%></div>
+				<%- end %>
+			<%- end %>
+		</div>
+		<%- end %>
+	<%- end %>
+</fieldset>
+<!-- tblsection -->
